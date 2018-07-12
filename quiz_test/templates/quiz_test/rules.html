@@ -1,0 +1,40 @@
+{% extends 'quiz_test/dashboard.html' %}
+{% load staticfiles %}
+{% block body %}
+
+<div class="col-md-12">
+    <div class="card">
+            
+            <div class="card-header card-header-text" data-background-color="rose">
+                <h4 class="card-title">Quiz Rules</h4>
+            </div>
+            <div class="card-content">
+                    <ul>
+                    	{% if type_q == 0 %}
+                    	<li>This is a multiple choice type quiz where each question has 4 options out of which <b>only one</b> is correct.</li>
+                    	{% endif %}
+                    	{% if type_q == 1%}
+                    	<li>This is a True/False kind of question.The answer is either True or False.</li>
+                    	{% endif %}
+                    	{% if type_q == 2 %}
+                    	<li>The questions contain both True/False and multiple choice types.</li>
+                    	{% endif %}
+                    	<li>Each correct answer will have <b>5 points.</b></li>
+                    	<li>There is <b>negative marking(-1)</b> for each question.</li>
+                    	<li>This is a time based quiz.The time limit for solving each question is {{time}} seconds.</li>
+                    	<li><b>Do Not refresh the page before completion of the test otherwise the test will be cancelled.</b></li>
+                    	<li style="list-style: none;"><center>**ALL THE BEST**</center></li>
+                    </ul>
+                    <div class="row">
+                        <div class="col-sm-10">
+                        <div class="form-group form-button">
+                            <a href="{% url 'quiz_test:easy' test_id=test.id %}" style="list-style: none;"><button type="submit" class="btn btn-fill btn-rose pull-right">Start Test</button></a><div class="ripple-container"></div>
+                        </div>
+                        </div>
+                    </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

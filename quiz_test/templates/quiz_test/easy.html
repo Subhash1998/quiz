@@ -1,0 +1,204 @@
+{% extends 'quiz_test/dashboard.html' %}
+{% load staticfiles %}
+{% block body %}
+{% autoescape on %}
+
+<div id="test" class="card">
+  <div class="card-content">
+    <h2 id="count" align="right"></h2>
+    <h5 id="number" class="card-header card-header-text" data-background-color="rose"></h5><h2><div id="display_question"></div></h2>
+    <h3><div id="options"></div></h3>
+  </div>
+</div>
+<div id="next" class="btn btn-fill btn-rose" onclick="next()"></div>
+<div class="card" align="center">
+  <div id="title" class="card-header card-header-text" data-background-color="rose">
+      <h4 class="card-title">Results</h4>
+  </div>
+
+  <div id="result" ></div>
+  <div id="points"></div>
+  <div id="percent"></div>
+  <div id="again"></div>
+</div>
+<script type="text/javascript" src="{% static 'js/jquery-2.2.4.min.js' %}"></script>
+<script type="text/javascript">
+ 
+var questions=JSON.parse("{{question|escapejs|safe}}");
+var test=JSON.parse("{{test.id}}");
+var level="{{difficulty}}";
+console.log(questions);
+var answered=[];
+var number=0,i=0;
+
+window.onbeforeunload = function() {
+  if(answered.length < questions.length){
+    return "Are you sure you want to leave?";
+  }
+} 
+
+window.onload=render;
+
+function render(){
+  if(number < questions.length){ 
+    $("#next").html("Next");
+    if(number < questions.length)
+    {
+      $("#number").html("Question-"+(number+1));
+      $("#display_question").html(questions[i].question);
+      var radioList = $('<ul>');
+      var item;
+      var input = '';
+      for (var j = 0; j < questions[i].choices.length; j++) {
+        item = $('<li style="list-style:none;">');
+        input = '<input type="radio" name="answer" value=' + (j+1) + ' />';
+        input += questions[i].choices[j];
+        item.append(input);
+        radioList.append(item);
+      }
+      $("#options").html(radioList);
+      $("#title").hide();
+      if(number == questions.length-1)
+      {
+        $("#next").html("Submit Answers");
+      }
+    }
+  }
+}
+
+
+var stopInterval = function() {
+    console.log('time is up!');
+    sec=0;
+  }
+
+
+function next(){
+    ctr=0;
+    $("input:radio").each(function(){
+          var $this = $(this);
+          if($this.is(":checked")){  
+            answered.push($this.attr("value"));
+            ctr=1;
+          }
+    });
+    if(ctr==0)
+    {
+      answered.push(0);
+    }
+    console.log(answered);
+    sec=15;
+    number++;
+    i++;
+    if(number < questions.length)
+    {
+      render();
+    }
+    else if(number==questions.length)
+    {
+        $("#test").hide();
+        $("#next").hide();
+        $("#display_question").hide();
+        $("#number").hide();
+        $("#options").hide();
+        $("#count").html("Test completed");
+        $("#title").show();
+        stopInterval();      
+        $.ajax({
+               type:"GET",
+               url:"{% url 'quiz_test:calculate' %}",
+               data: {                    
+                  'csrfmiddlewaretoken':$("input[name=csrfmiddlewaretoken]").val(),
+                      'answered': JSON.stringify(answered),
+                      'questions':JSON.stringify(questions),
+                      'test':JSON.stringify(test)
+                      },
+                  success: function(resp){
+                      $('#result').html("<h3>Number of questions answerd correctly = <b>" + resp.correctly + "</b><br>Total Questions : <b>" + questions.length + "</b></h3>");
+                      $('#points').html("<h3>Total points scored = <b>" + resp.point + "</b></h3>");
+                      $('#percent').html("<h3>Percentage = <b>" + (resp.correctly/questions.length)*100 + "%</b></h3>");
+                      $('#again').html("<button class='btn btn-success'><a href='/myquiz/test_form/' style='color:white;'>Play Another Test</a></button>");
+                  },
+                  fail: function(){
+                      alert('request failed');
+                  }   
+          });
+        console.log("answered");
+    }
+}
+var sec;
+if(level == "hard"){
+  sec=60;
+}
+else if(level == "medium"){
+  sec=40;
+}
+else{
+  sec=20;
+}
+var time = setInterval(myTimer, 1000);  
+function myTimer()
+{
+  if(number < questions.length){
+    document.getElementById('count').innerHTML = "Time left" + ' : ' + sec + ' ' + "seconds";
+    sec--;
+    if(sec==-1) 
+    {
+      ctr=0;
+      $("input:radio").each(function(){
+            var $this = $(this);
+            if($this.is(":checked")){  
+              answered.push($this.attr("value"));
+              ctr=1;
+            }
+      });
+      if(ctr==0)
+      {
+        answered.push(0);
+      }
+      console.log(answered); 
+
+      number++;
+      i++;
+      if(number==questions.length)
+      {
+          $("#test").hide();
+          $("#next").hide();
+          $("#display_question").hide();
+          $("#number").hide();
+          $("#options").hide();
+          $("#count").html("Test completed");
+          $("#title").show();
+          stopInterval();      
+          $.ajax({
+                 type:"GET",
+                 url:"{% url 'quiz_test:calculate' %}",
+                 data: {                    
+                    'csrfmiddlewaretoken':$("input[name=csrfmiddlewaretoken]").val(),
+                        'answered': JSON.stringify(answered),
+                        'questions':JSON.stringify(questions),
+                        'test':JSON.stringify(test)
+                        },
+                    success: function(resp){
+                        $('#result').html("<h3>Number of questions answerd correctly = <b>" + resp.correctly + "</b><br>Total Questions : <b>" + questions.length + "</b></h3>");
+                      $('#points').html("<h3>Total points scored = <b>" + resp.point + "</b></h3>");
+                      $('#percent').html("<h3>Percentage = <b>" + (resp.correctly/questions.length)*100 + "</b></h3>");
+                      $('#again').html("<a href='/myquiz/test_form/' style='color:white;'><button class='btn btn-success'>Play Another Test</button></a>");
+                    },
+                    fail: function(){
+                        alert('request failed');
+                    }   
+            });
+          console.log("answered");
+      }
+      else{
+        sec=15; 
+        render();
+      }
+    } 
+  }  
+}
+myTimer();
+</script>
+{% endautoescape %}
+{% endblock %}

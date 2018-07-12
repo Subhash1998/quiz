@@ -1,0 +1,149 @@
+{% extends 'quiz_test/dashboard.html' %}
+
+{% load widget_tweaks %}
+{% block body %}
+{% load staticfiles %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header card-header-icon" data-background-color="rose">
+                <i class="material-icons">perm_identity</i>
+            </div>
+            <div class="card-content">
+                <h4 class="card-title">Edit Profile -
+                    <small class="category">Complete your profile</small>
+                </h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Username</label>
+                                <input type="text" class="form-control" value="{{user.username}}" id="id_user_username" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Email address</label>
+                                <input type="email" class="form-control" value="{{user.email}}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <form action="{% url 'quiz_test:profile' %}" method="post">
+                	{% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group label-floating">
+                                <label class="control-label">First Name</label>
+                                <input type="text" class="form-control" value="{{ob.first_name}}" id="id_first_name" name="first_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Last Name</label>
+                                <input type="text" class="form-control" value="{{ob.last_name}}" id="id_last_name" name="last_name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Address</label>
+                                <input type="text" class="form-control" value="{{ob.address}}" id="id_address" name="address">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% for field in form %}
+                                {% if field.label == 'Country' %}
+                                    <div class="form-group label-floating">
+                                        <label>Country</label>
+                                        {{field|add_class:'form-control'}}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            {% for field in form %}
+                                {% if field.label == 'City' %}
+                                    <div class="form-group label-floating">
+                                        <label>City</label>
+                                        {{field|add_class:'form-control'}}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <!-- <div class="col-md-4">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Occupation</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div> -->
+                        <div class="col-md-4">
+		                    {% for field in form %}
+		                    	{% if field.label == 'Occupation' %}
+									<div class="form-group label-floating">
+										<label>Country</label>
+										{{field|add_class:'form-control'}}
+									</div>
+		                    	{% endif %}
+		                    {% endfor %}
+                    	</div>
+                        <div class="col-md-4">
+                            <div class="form-group label-floating">
+                                <label class="control-label">Mobile Number</label>
+                                <input type="text" class="form-control" value="{{ob.mobile_number}}" id="id_mobile_number" name="mobile_number">
+                                <small style="color:red;">With country code</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-rose pull-right">Update Profile</button>
+                    <div class="clearfix"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <form action="{% url 'quiz_test:about_profile' %}" method="post" enctype="multipart/form-data">
+    	{% csrf_token %}
+	    <div class="col-md-4">
+	        <div class="card card-profile">
+	            <div class="card-avatar">
+	            	{% if ob.image %}
+	                    <img class="img" src="{{ob.image.url}}" />
+	                {% endif %}
+	                <div class="fileinput fileinput-new" data-provides="fileinput">
+							<div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px;"></div>
+							<div>
+								<span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span class="fileinput-exists">Change</span>
+								<input type="file" name="image" id="id_image"></span>
+								<a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+							</div>
+						</div>
+	            </div>
+	            <div class="card-content">
+	                <div class="row">
+	                        <div class="col-md-12">
+	                            <div class="form-group">
+	                                <label>About Me</label>
+	                                <div class="form-group label-floating">
+                                        {% if ob.about %}
+    	                                    <textarea name="about" id="id_about" class="form-control" rows="5">{{ob.about}}</textarea>
+                                        {% else %}
+                                            <textarea name="about" id="id_about" class="form-control" rows="5"></textarea>
+                                        {% endif %}
+	                                    <small style="color: red;">Not more than 100 words</small>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                <button type="submit" class="btn btn-rose btn-round">Update</button>
+	            </div>
+	        </div>
+	    </div>
+	</form>
+</div>
+{% endblock %}
+{% block newjs %}
+<script type="text/javascript" src="{% static 'newjs/chainedfk.js' %}"></script>
+<script type="text/javascript" src="{% static 'newjs/bindfields.js' %}"></script>
+{% endblock %}
